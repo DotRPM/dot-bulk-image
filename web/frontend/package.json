@@ -22,6 +22,7 @@
     "@shopify/polaris": "^10.42.0",
     "@shopify/stylelint-polaris": "^9.0.2",
     "@vitejs/plugin-react": "1.2.0",
+    "dotenv": "^16.0.3",
     "react": "^17.0.2",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
