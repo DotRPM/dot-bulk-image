@@ -19,6 +19,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import ProductLine from "../components/products/ProductLine";
 import ImageItem from "../components/images/ImageItem";
 import { useDrop } from "react-dnd";
+import ChatBanner from "../components/banners/ChatBanner";
 
 export default function HomePage() {
   const fetch = useAuthenticatedFetch();
@@ -84,6 +85,10 @@ export default function HomePage() {
     <Page>
       <Frame>
         <Layout>
+          <Layout.Section>
+            <ChatBanner />
+          </Layout.Section>
+
           <Layout.Section oneHalf>
             <LegacyCard>
               <LegacyCard.Section>
