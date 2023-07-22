@@ -20,6 +20,8 @@ import ProductLine from "../components/products/ProductLine";
 import ImageItem from "../components/images/ImageItem";
 import { useDrop } from "react-dnd";
 import ChatBanner from "../components/banners/ChatBanner";
+import OnboardingSteps from "../components/onboarding/OnboardingSteps";
+import OnboardingBanner from "../components/banners/OnboardingBanner";
 
 export default function HomePage() {
   const fetch = useAuthenticatedFetch();
@@ -32,6 +34,7 @@ export default function HomePage() {
   const [productsToUpdate, setProductsToUpdate] = useState([]);
   const [emptyImagesAfterDrop, setEmptyImagesAfterDrop] = useState(false);
   const [successToast, setSucessToast] = useState(false);
+  const [runOnboarding, setRunOnboarding] = useState(false);
   const fileInput = useRef();
 
   const loadProducts = async (query = {}) => {
@@ -85,6 +88,11 @@ export default function HomePage() {
     <Page>
       <Frame>
         <Layout>
+          <Layout.Section>
+            <OnboardingSteps run={runOnboarding} />
+            <OnboardingBanner setRun={setRunOnboarding} />
+          </Layout.Section>
+
           <Layout.Section>
             <ChatBanner />
           </Layout.Section>
