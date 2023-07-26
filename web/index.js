@@ -8,6 +8,8 @@ import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 import { productsRouter } from "./routes/index.js";
+import { connectDB } from "./db.js";
+import Shop from "./models/Shop.js";
 
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",
@@ -19,6 +21,8 @@ const STATIC_PATH =
     ? `${process.cwd()}/frontend/dist`
     : `${process.cwd()}/frontend/`;
 
+await connectDB();
+
 const app = express();
 
 // Set up Shopify authentication and webhook handling
@@ -26,6 +30,34 @@ app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
+  // storing store data on installation
+  async (_req, res, next) => {
+    const session = res.locals.shopify.session;
+    const shopData = await Shop.findOne({ domain: session.shop });
+    if (!shopData) {
+      const shop = (
+        await shopify.api.rest.Shop.all({
+          session,
+        })
+      ).data[0];
+      const newShop = new Shop({
+        name: shop.name,
+        domain: shop.myshopify_domain,
+        email: shop.email,
+      });
+      await newShop.save();
+      const appUrl = shopify.api.auth.buildEmbeddedAppUrl(
+        Buffer.from(
+          `admin.shopify.com/store/${session.shop.replace(
+            ".myshopify.com",
+            ""
+          )}`
+        ).toString("base64")
+      );
+      res.redirect(`${appUrl}/?tour=1`);
+    }
+    next();
+  },
   shopify.redirectToShopifyOrAppRoot()
 );
 app.post(

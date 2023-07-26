@@ -81,6 +81,8 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    const tour = new URLSearchParams(window.location.search).get("tour");
+    if (Number(tour) == 1) setRunOnboarding(true);
     loadProducts();
   }, []);
 
