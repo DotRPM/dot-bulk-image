@@ -30,14 +30,21 @@ router.get("/", async (req, res) => {
 router.post("/", upload.array("images"), async (req, res) => {
   try {
     const productId = req.body.productId;
+    const addToLast = Boolean(req.body.addToLast);
     const images = req.files;
+    const session = res.locals.shopify.session;
+
+    const { count: imageCount } = await shopify.api.rest.Image.count({
+      session: session,
+      product_id: productId,
+    });
 
     for (const imageFile of images) {
       const image = new shopify.api.rest.Image({
-        session: res.locals.shopify.session,
+        session: session,
       });
       image.product_id = productId;
-      image.position = 1;
+      image.position = addToLast ? imageCount + 1 : 1;
       image.attachment = imageFile.buffer.toString("base64");
       image.filename = imageFile.originalname;
       await image.save({

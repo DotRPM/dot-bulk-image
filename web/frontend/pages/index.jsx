@@ -15,13 +15,14 @@ import {
 } from "@shopify/polaris";
 import { AddImageMajor } from "@shopify/polaris-icons";
 import { useAuthenticatedFetch } from "../hooks/useAuthenticatedFetch";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import ProductLine from "../components/products/ProductLine";
 import ImageItem from "../components/images/ImageItem";
 import { useDrop } from "react-dnd";
 import ChatBanner from "../components/banners/ChatBanner";
 import OnboardingSteps from "../components/onboarding/OnboardingSteps";
 import OnboardingBanner from "../components/banners/OnboardingBanner";
+import { helpVideo } from "../assets";
 
 export default function HomePage() {
   const fetch = useAuthenticatedFetch();
@@ -33,6 +34,7 @@ export default function HomePage() {
   const [files, setFiles] = useState([]);
   const [productsToUpdate, setProductsToUpdate] = useState([]);
   const [emptyImagesAfterDrop, setEmptyImagesAfterDrop] = useState(false);
+  const [addImagesToLast, setAddImagesToLast] = useState(false);
   const [successToast, setSucessToast] = useState(false);
   const [runOnboarding, setRunOnboarding] = useState(false);
   const fileInput = useRef();
@@ -65,6 +67,7 @@ export default function HomePage() {
     for (const obj of productsToUpdate) {
       const formData = new FormData();
       formData.append("productId", obj.id);
+      if (addImagesToLast) formData.append("addToLast", "true");
 
       for (let i = 0; i < obj.images.length; i++) {
         formData.append(`images`, obj.images[i]);
@@ -97,6 +100,14 @@ export default function HomePage() {
 
           <Layout.Section>
             <ChatBanner />
+          </Layout.Section>
+
+          <Layout.Section>
+            <LegacyCard sectioned>
+              <video style={{width: "100%", borderRadius: "7px"}} autoPlay="autoplay" loop muted>
+                <source src={helpVideo} />
+              </video>
+            </LegacyCard>
           </Layout.Section>
 
           <Layout.Section oneHalf>
@@ -144,6 +155,13 @@ export default function HomePage() {
                     onPrevious={() => loadProducts({ ...prevPageParams })}
                   />
                 </LegacyStack>
+              </LegacyCard.Section>
+              <LegacyCard.Section>
+                <Checkbox
+                  label="Add images to the last"
+                  checked={addImagesToLast}
+                  onChange={(checked) => setAddImagesToLast(checked)}
+                />
               </LegacyCard.Section>
               <LegacyCard.Section>
                 <LegacyStack alignment="center" distribution="trailing">
