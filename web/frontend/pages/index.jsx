@@ -12,10 +12,11 @@ import {
   Spinner,
   Toast,
   Frame,
+  TextField,
 } from "@shopify/polaris";
-import { AddImageMajor } from "@shopify/polaris-icons";
+import { AddImageMajor, SearchMinor } from "@shopify/polaris-icons";
 import { useAuthenticatedFetch } from "../hooks/useAuthenticatedFetch";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import ProductLine from "../components/products/ProductLine";
 import ImageItem from "../components/images/ImageItem";
 import { useDrop } from "react-dnd";
@@ -37,6 +38,7 @@ export default function HomePage() {
   const [addImagesToLast, setAddImagesToLast] = useState(false);
   const [successToast, setSucessToast] = useState(false);
   const [runOnboarding, setRunOnboarding] = useState(false);
+  const [search, setSearch] = useState("");
   const fileInput = useRef();
 
   const loadProducts = async (query = {}) => {
@@ -46,11 +48,16 @@ export default function HomePage() {
     );
     const data = await response.json();
     setProducts(data.products);
-    console.log(data);
     setNextPageParams(data.nextPageInfo);
     setPrevPageParams(data.prevPageInfo);
     setFetchingStatus("loaded");
   };
+
+  useMemo(() => {
+    if (search) {
+      loadProducts({ title: search });
+    } else loadProducts();
+  }, [search]);
 
   const [{ isOver }, dropRef] = useDrop({
     accept: "image",
@@ -104,7 +111,12 @@ export default function HomePage() {
 
           <Layout.Section>
             <LegacyCard sectioned>
-              <video style={{width: "100%", borderRadius: "7px"}} autoPlay="autoplay" loop muted>
+              <video
+                style={{ width: "100%", borderRadius: "7px" }}
+                autoPlay="autoplay"
+                loop
+                muted
+              >
                 <source src={helpVideo} />
               </video>
             </LegacyCard>
@@ -116,6 +128,18 @@ export default function HomePage() {
                 <Text variant="bodyLg" fontWeight="semibold">
                   Products
                 </Text>
+              </LegacyCard.Section>
+              <LegacyCard.Section>
+                <TextField
+                  variant="bodyLg"
+                  fontWeight="semibold"
+                  placeholder="Search products..."
+                  prefix={<Icon source={SearchMinor} />}
+                  value={search}
+                  onChange={(value) => setSearch(value)}
+                  clearButton
+                  onClearButtonClick={() => setSearch("")}
+                />
               </LegacyCard.Section>
               <LegacyCard.Section flush>
                 <Scrollable shadow style={{ height: "70vh" }}>
