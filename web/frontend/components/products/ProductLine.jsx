@@ -21,9 +21,12 @@ export default function ProductLine({
   const [{ isOver }, dropRef] = useDrop({
     accept: "image",
     canDrop: () =>
-      productsToUpdate.find((p) => p.id == product.id)?.images?.length != 6,
+      productsToUpdate.find((p) => p.id == product.legacyResourceId)?.images
+        ?.length != 6,
     drop: (item) => {
-      const index = productsToUpdate.findIndex((p) => p.id == product.id);
+      const index = productsToUpdate.findIndex(
+        (p) => p.id == product.legacyResourceId
+      );
 
       let tempData = productsToUpdate;
 
@@ -35,7 +38,7 @@ export default function ProductLine({
         if (emptyImages) setFiles((state) => state.filter((s) => s != item));
         setProductsToUpdate((state) => [
           ...state,
-          { id: product.id, images: [item] },
+          { id: product.legacyResourceId, images: [item] },
         ]);
       }
     },
@@ -45,7 +48,9 @@ export default function ProductLine({
   });
 
   const handleImageRemove = (image) => {
-    const index = productsToUpdate.findIndex((p) => p.id == product.id);
+    const index = productsToUpdate.findIndex(
+      (p) => p.id == product.legacyResourceId
+    );
     let tempData = productsToUpdate;
     if (tempData[index].images.length > 1) {
       tempData[index].images = tempData[index].images.filter((i) => i != image);
@@ -56,7 +61,9 @@ export default function ProductLine({
   };
 
   const clearAllImages = () => {
-    setProductsToUpdate((state) => state.filter((s) => s.id != product.id));
+    setProductsToUpdate((state) =>
+      state.filter((s) => s.id != product.legacyResourceId)
+    );
   };
 
   return (
@@ -65,14 +72,17 @@ export default function ProductLine({
         <LegacyCard.Section>
           <LegacyStack alignment="center">
             <LegacyStack.Item>
-              <Thumbnail source={product.image.src} size="small"></Thumbnail>
+              <Thumbnail
+                source={product.featuredImage.url}
+                size="small"
+              ></Thumbnail>
             </LegacyStack.Item>
             <LegacyStack.Item fill>
               <Text variant="bodyMd" fontWeight="semibold">
                 {product.title}
               </Text>
               <Text variant="bodySm" fontWeight="regular">
-                Last updated: {new Date(product.updated_at).toDateString()}
+                Last updated: {new Date(product.updatedAt).toDateString()}
               </Text>
             </LegacyStack.Item>
             <LegacyStack.Item>
@@ -81,8 +91,9 @@ export default function ProductLine({
                   icon={DeleteMinor}
                   onClick={clearAllImages}
                   disabled={
-                    !productsToUpdate.find((p) => p.id == product.id)?.images
-                      ?.length > 0
+                    !productsToUpdate.find(
+                      (p) => p.id == product.legacyResourceId
+                    )?.images?.length > 0
                   }
                 ></Button>
               </Tooltip>
@@ -91,7 +102,7 @@ export default function ProductLine({
           <div style={{ marginTop: "0.8rem" }}>
             <LegacyStack alignment="center" spacing="extraTight">
               {productsToUpdate
-                .find((p) => p.id == product.id)
+                .find((p) => p.id == product.legacyResourceId)
                 ?.images.map((image, index) => (
                   <ProductImage
                     image={image}

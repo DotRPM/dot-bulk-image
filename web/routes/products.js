@@ -7,19 +7,47 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 router.get("/", async (req, res) => {
+  const session = res.locals.shopify.session;
+  let variables = req.query;
   try {
-    let query = req.query;
-    if (!query.limit) {
-      query = { ...query, limit: 15 };
+    if (!variables.limit) {
+      variables = { ...variables, limit: 15 };
     }
-    const products = await shopify.api.rest.Product.all({
-      session: res.locals.shopify.session,
-      ...query,
-    });
+    const client = new shopify.api.clients.Graphql({ session });
+    const { data } = await client.request(
+      `
+        query productsQuery ($limit:Int, $query: String, $cursor: String) {
+          products (${
+            variables.prev ? "last" : "first"
+          }: $limit, query:$query, ${
+        variables.prev ? "before" : "after"
+      }: $cursor, sortKey: TITLE) {
+            nodes {
+              id
+              title
+              updatedAt
+              legacyResourceId
+              featuredImage {
+                url
+                altText
+              }
+            }
+            pageInfo {
+              endCursor
+              startCursor
+              hasNextPage
+              hasPreviousPage
+            }
+          }
+        }
+      `,
+      {
+        variables,
+      }
+    );
     res.status(200).json({
-      products: products.data,
-      nextPageInfo: products.pageInfo?.nextPage?.query,
-      prevPageInfo: products.pageInfo?.prevPage?.query,
+      products: data.products.nodes,
+      pageInfo: data.products.pageInfo,
     });
   } catch (error) {
     console.log(error);

@@ -29,8 +29,7 @@ export default function HomePage() {
   const fetch = useAuthenticatedFetch();
 
   const [products, setProducts] = useState([]);
-  const [nextPageParams, setNextPageParams] = useState(null);
-  const [prevPageParams, setPrevPageParams] = useState(null);
+  const [pageInfo, setPageInfo] = useState(null);
   const [fetchingStatus, setFetchingStatus] = useState("loading");
   const [files, setFiles] = useState([]);
   const [productsToUpdate, setProductsToUpdate] = useState([]);
@@ -48,14 +47,13 @@ export default function HomePage() {
     );
     const data = await response.json();
     setProducts(data.products);
-    setNextPageParams(data.nextPageInfo);
-    setPrevPageParams(data.prevPageInfo);
+    setPageInfo(data.pageInfo);
     setFetchingStatus("loaded");
   };
 
   useMemo(() => {
     if (search) {
-      loadProducts({ title: search });
+      loadProducts({ query: search });
     } else loadProducts();
   }, [search]);
 
@@ -173,10 +171,19 @@ export default function HomePage() {
               <LegacyCard.Section>
                 <LegacyStack distribution="center" alignment="center">
                   <Pagination
-                    hasNext={nextPageParams}
-                    hasPrevious={prevPageParams}
-                    onNext={() => loadProducts({ ...nextPageParams })}
-                    onPrevious={() => loadProducts({ ...prevPageParams })}
+                    hasNext={
+                      pageInfo?.hasNextPage && fetchingStatus != "loading"
+                    }
+                    hasPrevious={
+                      pageInfo?.hasPreviousPage && fetchingStatus != "loading"
+                    }
+                    onNext={() => loadProducts({ cursor: pageInfo?.endCursor })}
+                    onPrevious={() =>
+                      loadProducts({
+                        prev: true,
+                        cursor: pageInfo?.startCursor,
+                      })
+                    }
                   />
                 </LegacyStack>
               </LegacyCard.Section>
