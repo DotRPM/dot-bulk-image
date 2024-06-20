@@ -1,6 +1,7 @@
+import multer from "multer";
 import express from "express";
 import shopify from "../shopify.js";
-import multer from "multer";
+import { bufferToStream, streamToBase64 } from "../helpers/stream.js";
 
 const router = express.Router();
 const storage = multer.memoryStorage();
@@ -68,12 +69,15 @@ router.post("/", upload.array("images"), async (req, res) => {
     });
 
     for (const imageFile of images) {
+      const imageStream = bufferToStream(imageFile.buffer);
+      const base64Image = await streamToBase64(imageStream);
+
       const image = new shopify.api.rest.Image({
         session: session,
       });
       image.product_id = productId;
       image.position = addToLast ? imageCount + 1 : 1;
-      image.attachment = imageFile.buffer.toString("base64");
+      image.attachment = base64Image;
       image.filename = imageFile.originalname;
       await image.save({
         update: true,
